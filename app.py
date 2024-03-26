@@ -129,7 +129,7 @@ retriever = SelfQueryRetriever.from_llm(
     metadata_field_info,
     enable_limit = True,
     search_kwargs={"k": 50},
-    verbose = True,
+    verbose = True
 )
 
 chain = RetrievalQA.from_chain_type(llm=llm, chain_type='stuff', retriever=retriever, return_source_documents=True, verbose=True, input_key="question")

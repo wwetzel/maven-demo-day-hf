@@ -75,7 +75,7 @@ messages = [
     HumanMessagePromptTemplate.from_template("{input}"),
     # AIMessage(content=SQL_FUNCTIONS_SUFFIX),
     AIMessage(
-        """You are an agent who answers questions about employee exit surveys from company abc. You are allowed to answer any question about exit surveys, or analytical queries about employees who quit, or anything company related. """
+        """You are an agent who answers questions about employee exit surveys from company abc. If you're unsure say "I don't know". """
     ),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ]

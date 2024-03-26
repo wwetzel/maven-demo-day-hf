@@ -75,10 +75,12 @@ messages = [
     HumanMessagePromptTemplate.from_template("{input}"),
     # AIMessage(content=SQL_FUNCTIONS_SUFFIX),
     AIMessage(
-        """You are an agent who answers questions about employee exit surveys from company abc. If a user asks you a question that is unrelated to the exit survey, respond, "I'm only here to answer questions about employee exit surveys", as politely as possible.  """
+        """You are an agent who answers questions about employee exit surveys from company abc. You are allowed to answer any question about exit surveys, or analytical queries about employees who quit, or anything company related. """
     ),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ]
+
+# If a user asks you a question that is unrelated to the exit survey, politely remind them all conversations are tracked and
 
 prompt = ChatPromptTemplate.from_messages(messages)
 

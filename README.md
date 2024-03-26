@@ -1,6 +1,6 @@
 ---
 title: Maven Demo Day
-emoji: 📊
+emoji: 💻
 colorFrom: yellow
 colorTo: gray
 sdk: docker

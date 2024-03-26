@@ -63,7 +63,7 @@ repl_tool = Tool(
     description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`.",
     func=python_repl.run,
 )
-tool_description = "Use this tool to gather numeric data and averages"
+tool_description = "Use this tool to answer analytical questions by converting natural language to sql queries. If you need to summarize exit survey responses, do not use this tool, use the survey_search vector database."
 agent_db = SQLDatabase.from_uri(db_uri)
 sql_toolkit = SQLDatabaseToolkit(
     db=agent_db, llm=ChatOpenAI(temperature=0), tool_description=tool_description
@@ -75,7 +75,7 @@ messages = [
     HumanMessagePromptTemplate.from_template("{input}"),
     # AIMessage(content=SQL_FUNCTIONS_SUFFIX),
     AIMessage(
-        """ Use search_survey_response to summarize exit survey data. Use the sql tool for quantitative questions by converting natural language to a sql query."""
+        """You are an agent who answers questions about employee exit surveys from company abc. If a user asks you a question that is unrelated to the exit survey, respond, "I'm only here to answer questions about employee exit surveys", as politely as possible.  """
     ),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ]
@@ -135,9 +135,7 @@ metadata_field_info = [
     ),
 ]
 document_content_description = "Reason employee is leaving the company"
-
 llm = ChatOpenAI(model="gpt-4-0613", temperature=0)
-
 
 query_prompt = get_query_constructor_prompt(
     document_content_description,
@@ -157,7 +155,7 @@ retriever = SelfQueryRetriever(
 retriever_tool = create_retriever_tool(
     retriever,
     name="survey_search",
-    description="Use this tool to summarize semantic information on why employees are quitting the company",
+    description="Use this tool to summarize semantic information on why employees are quitting the company. Use to to answer questions about exit surveys.",
 )
 
 openai_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)

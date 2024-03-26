@@ -1,6 +1,5 @@
 🤖💼 Exit Survey Sage 🤖💼 - Your go-to guru 🧙‍♂️📚 for all things quit-tastic! 🚪🏃‍♀️💨 Ask away and dive deep into the why's of goodbye's 🤔👋! 🌪️🔥 Whether it's data drama 📈🎭 or insights with attitude 😎📉, I'm here to spice up your analysis! 🌶️💡 Let's decode 🕵️‍♂️🔍 the secrets behind those exit doors! 🚪🔓
 
-
 This is an Agent🤖 which will query employee exit survey data and answer questions about it. The Agent has access to the following data:
 
 a. 1k synthetically generated employee exit surveys

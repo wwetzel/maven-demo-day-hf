@@ -63,7 +63,7 @@ repl_tool = Tool(
     description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`.",
     func=python_repl.run,
 )
-tool_description = "Use this tool to answer analytical questions by converting natural language to sql queries. If you need to summarize exit survey responses, do not use this tool, use the survey_search vector database."
+tool_description = "Use this tool to answer counts, averages, and group by queries. If you need to summarize text data, a better tool is the vector database."
 agent_db = SQLDatabase.from_uri(db_uri)
 sql_toolkit = SQLDatabaseToolkit(
     db=agent_db, llm=ChatOpenAI(temperature=0), tool_description=tool_description

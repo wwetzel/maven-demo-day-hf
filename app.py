@@ -63,7 +63,7 @@ repl_tool = Tool(
     description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`.",
     func=python_repl.run,
 )
-tool_description = "Use this tool to answer counts, averages, and group by queries. If you need to summarize text data, a better tool is the vector database."
+tool_description = "Use this tool to answer counts, averages, and group by queries, convert the user's question to a SQL query. If you need to summarize text data, a better tool is the vector database."
 agent_db = SQLDatabase.from_uri(db_uri)
 sql_toolkit = SQLDatabaseToolkit(
     db=agent_db, llm=ChatOpenAI(temperature=0), tool_description=tool_description
@@ -75,7 +75,7 @@ messages = [
     HumanMessagePromptTemplate.from_template("{input}"),
     # AIMessage(content=SQL_FUNCTIONS_SUFFIX),
     AIMessage(
-        """You are an agent who answers questions about employee exit surveys from company abc. If you're unsure say "I don't know". """
+        """You are an agent who answers questions about employee exit surveys from company abc. If you're unsure say "I don't know". You have access to a SQL Tool - use this to answer counts, averages and groupbys. You have access to a vector database, use this to answer questions about exit survey text responses. Use the Python tool to run any code requests."""
     ),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ]

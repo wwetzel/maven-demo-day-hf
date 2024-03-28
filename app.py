@@ -50,19 +50,27 @@ from langchain_openai import ChatOpenAI
 
 from utils import read_from_sqlite, load_sqlite
 
+#############
+##LOAD DATA##
+#############
 db_uri = "sqlite:///hr_database.db"
-# db_uri_ro = "file:hr_database.db?mode=ro"
-data_fp = os.getenv("DATA_FP")  # '/opt/ddlfiles/KDS_DEV/DATA/DS/maven/'
+data_fp = os.getenv("DATA_FP")
 hr_fn = "maven_final_synthetic_data.xlsx"
-# print('LOADING SQLITE')
 hr_df = read_from_sqlite(db_uri)
-# hr_df = load_sqlite(data_fp, hr_fn, db_uri)
+
+######################
+##CREATE PYTHON TOOL##
+######################
 python_repl = PythonREPLTool()
 repl_tool = Tool(
     name="python_repl",
     description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`.",
     func=python_repl.run,
 )
+
+###################
+##CREATE SQL TOOL##
+###################
 tool_description = "Use this tool to answer counts, averages, and group by queries, convert the user's question to a SQL query. If you need to summarize text data, a better tool is the vector database."
 agent_db = SQLDatabase.from_uri(db_uri)
 sql_toolkit = SQLDatabaseToolkit(
@@ -71,18 +79,9 @@ sql_toolkit = SQLDatabaseToolkit(
 sql_context = sql_toolkit.get_context()
 sql_tools = sql_toolkit.get_tools()
 
-messages = [
-    HumanMessagePromptTemplate.from_template("{input}"),
-    # AIMessage(content=SQL_FUNCTIONS_SUFFIX),
-    AIMessage(
-        """You are an agent who answers questions about employee exit surveys from company abc. If you're unsure say "I don't know". You have access to a SQL Tool - use this to answer counts, averages and groupbys. You have access to a vector database, use this to answer questions about exit survey text responses. Use the Python tool to run any code requests."""
-    ),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),
-]
-
-# If a user asks you a question that is unrelated to the exit survey, politely remind them all conversations are tracked and
-
-prompt = ChatPromptTemplate.from_messages(messages)
+############################
+##LOAD/CREATE VECTOR STORE##
+############################
 
 if os.path.exists("./chroma_db"):
     print("LOADING CHROMA CACHE")
@@ -99,6 +98,9 @@ else:
         documents, OpenAIEmbeddings(), persist_directory="./chroma_db"
     )
 
+#########################
+##ASSIGN META DATA INFO##
+#########################
 metadata_field_info = [
     AttributeInfo(
         name="term_year",
@@ -137,6 +139,10 @@ metadata_field_info = [
     ),
 ]
 document_content_description = "Reason employee is leaving the company"
+
+###################
+##CONSTRUCT QUERY##
+###################
 llm = ChatOpenAI(model="gpt-4-0613", temperature=0)
 
 query_prompt = get_query_constructor_prompt(
@@ -145,6 +151,10 @@ query_prompt = get_query_constructor_prompt(
 )
 output_parser = StructuredQueryOutputParser.from_components()
 query_constructor = query_prompt | llm | output_parser
+
+####################
+##CREATE RETRIEVER##
+####################
 retriever = SelfQueryRetriever(
     query_constructor=query_constructor,
     vectorstore=vectorstore,
@@ -160,6 +170,23 @@ retriever_tool = create_retriever_tool(
     description="Use this tool to summarize semantic information on why employees are quitting the company. Use to to answer questions about exit surveys.",
 )
 
+##########
+##PROMPT##
+##########
+messages = [
+    HumanMessagePromptTemplate.from_template("{input}"),
+    AIMessage(
+        """You are an agent who answers questions about employee exit surveys from company abc. If you're unsure say "I don't know". You have access to a SQL Tool - use this to answer counts, averages and groupbys. You have access to a vector database, use this to answer questions about exit survey text responses. Use the Python tool to run any code requests."""
+    ),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+]
+
+prompt = ChatPromptTemplate.from_messages(messages)
+
+################
+##CREATE AGENT##
+################
+
 openai_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 openai_agent = create_openai_tools_agent(
     openai_llm, sql_tools + [repl_tool] + [retriever_tool], prompt
@@ -172,6 +199,10 @@ agent_executor = AgentExecutor(
     return_intermediate_steps=True,
     max_iterations=10,
 )
+
+################
+##CHAINLIT APP##
+################
 
 
 @cl.on_chat_start  # marks a function that will be executed at the start of a user session
